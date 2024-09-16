@@ -166,10 +166,10 @@ export class RestaurantService {
           },
           HttpStatus.NOT_FOUND,
         );
-      await queryRunner.manager.delete(Restaurant, { id: toDelete.id });
+      await queryRunner.manager.delete(Restaurant, {id: toDelete.id});
       await queryRunner.commitTransaction();
 
-      return { deleted: toDelete };
+      return {deleted: toDelete};
     } catch (error) {
       await queryRunner.rollbackTransaction();
 
@@ -190,6 +190,9 @@ export class RestaurantService {
   ) {
     let time = timeNow();
     let queryResult = await this.restaurantRepository.findAndCount({
+      relations: {
+        tables: true
+      },
       where: {
         openingTime: LessThanOrEqual(time),
         closingTime: MoreThanOrEqual(time),

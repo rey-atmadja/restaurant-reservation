@@ -22,7 +22,7 @@ export class CustomerController {
   async getCustomers(@Query() query: any) {
     try {
       let value = this.validator.getCustomers({ ...query });
-      return this.customerService.getCustomers(value);
+      return await this.customerService.getCustomers(value);
     } catch (error) {
       throw error;
     }
@@ -32,7 +32,7 @@ export class CustomerController {
   async addCustomer(@Body() input: any) {
     try {
       let value = this.validator.addCustomer(input);
-      return this.customerService.addCustomer(value);
+      return await this.customerService.addCustomer(value);
     } catch (error) {
       throw error;
     }
@@ -42,7 +42,7 @@ export class CustomerController {
   async updateCustomer(@Body() input: any, @Param() param: any) {
     try {
       let value = this.validator.updateCustomer({ ...input, ...param });
-      return this.customerService.updateCustomer(value);
+      return await this.customerService.updateCustomer(value);
     } catch (error) {
       throw error;
     }
@@ -52,7 +52,7 @@ export class CustomerController {
   async deleteCustomer(@Param() param: any) {
     try {
       let value = this.validator.deleteCustomer({ ...param });
-      return this.customerService.deleteCustomer(value);
+      return await this.customerService.deleteCustomer(value);
     } catch (error) {
       throw error;
     }

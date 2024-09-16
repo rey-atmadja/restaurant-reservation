@@ -20,7 +20,7 @@ export class RestaurantController {
   async addRestaurant(@Body() input: any) {
     try {
       let value = this.validator.addRestaurant(input);
-      return this.restaurantService.addRestaurant(value);
+      return await this.restaurantService.addRestaurant(value);
     } catch (error) {
       throw error;
     }
@@ -29,7 +29,7 @@ export class RestaurantController {
   async getOpenRestaurantForReservation(@Query() query) {
     try {
       let value = this.validator.getOpenRestaurantForReservation(query);
-      return this.restaurantService.getOpenRestaurantForReservation(value);
+      return await this.restaurantService.getOpenRestaurantForReservation(value);
     } catch (error) {
       throw error;
     }
@@ -38,7 +38,7 @@ export class RestaurantController {
   async updateRestaurant(@Param() param, @Body() input) {
     try {
       let value = this.validator.updateRestaurant({...param, ...input});
-      return this.restaurantService.updateRestaurant(value);
+      return await this.restaurantService.updateRestaurant(value);
     } catch (error) {
       throw error;
     }
@@ -47,7 +47,7 @@ export class RestaurantController {
   async deleteRestaurant(@Param() param) {
     try {
       let value = this.validator.deleteRestaurant(param);
-      return this.restaurantService.deleteRestaurant(value);
+      return await this.restaurantService.deleteRestaurant(value);
     } catch (error) {
       throw error;
     }

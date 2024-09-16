@@ -1,4 +1,5 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Table } from 'src/table/table.entity';
+import { Entity, Column, PrimaryGeneratedColumn,OneToMany } from 'typeorm';
 
 @Entity({
   name: 'restaurant',
@@ -19,4 +20,7 @@ export class Restaurant {
   
   @Column('timestamp with time zone', { name: 'created_at' })
   createdAt?: Date;
+
+  @OneToMany(() => Table, (table) =>table.restaurant, {onDelete: 'CASCADE'})
+  tables?: Table[]
 }

@@ -20,27 +20,37 @@ export class CustomerService {
   ) {}
 
   async addCustomer(input: addCustomerDto) {
+    //Set up transaction
     const queryRunner = this.dataSource.createQueryRunner();
 
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
     try {
+      //Create a new Customer entry
       let newUser: Customer = {
         email: input.email,
         username: input.username,
         password: input.password,
       };
 
+      //Create a new Customer entity
       let userInstance = new Customer();
 
+      //Assign entry to the entity so it is savable
       Object.assign(userInstance, newUser);
 
+      //Save entity, inserting it into the database
       let saveResult = await queryRunner.manager.save(userInstance);
+
+      //Commit the transaction
       await queryRunner.commitTransaction();
+
+      //Return the inserted Customer
       return saveResult;
     } catch (error) {
       let errorMessage = error;
+      //If the error is due to unique constraint being hit: return the proper field that is currently causing the error
       if (error instanceof QueryFailedError) {
         let constraint = error.driverError.constraint
           ? error.driverError.constraint
@@ -61,6 +71,8 @@ export class CustomerService {
         }
       }
       await queryRunner.rollbackTransaction();
+
+      //Otherwise return a generic error
       throw new HttpException(
         { message: 'DATABASE_ERROR', error: errorMessage },
         HttpStatus.INTERNAL_SERVER_ERROR,
