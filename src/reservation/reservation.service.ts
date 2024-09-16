@@ -14,10 +14,10 @@ import { Reservations } from './reservation.entity';
 
 import * as lodash from 'lodash';
 
-import { timeNow } from 'src/helper/functions';
+import { timeNow } from '../helper/functions';
 import * as moment from 'moment';
-import { Restaurant } from 'src/restaurant/restaurant.entity';
-import { Table } from 'src/table/table.entity';
+import { Restaurant } from '../restaurant/restaurant.entity';
+import { Table } from '../table/table.entity';
 import {
   addReservationDto,
   cancelReservationDto,
@@ -25,6 +25,18 @@ import {
   getReservationsDoneByCustomerDto,
   updateReservationDto,
 } from './reservation.dto';
+
+import{createTransport }from 'nodemailer';
+import { Customer } from 'src/customer/customer.entity';
+
+const client = createTransport({
+  host: 'smtp.gmail.com',
+  port: 587,
+  auth: {
+    user: 'dreamofpast@gmail.com',
+    pass: 'cfqt rkwg zxkf rmvf'
+  }
+})
 
 @Injectable()
 export class ReservationService {
@@ -35,6 +47,8 @@ export class ReservationService {
     private restaurantRepository: Repository<Restaurant>,
     @InjectRepository(Table)
     private tableRepository: Repository<Table>,
+    @InjectRepository(Customer)
+    private customerRepository: Repository<Customer>,
     private dataSource: DataSource,
   ) {}
 
@@ -46,6 +60,10 @@ export class ReservationService {
 
     try {
       let restaurantCheck = await this.restaurantCheck(input.restaurantId);
+      let customer = await this.customerRepository.findOne({where: {id: input.customerId}});
+
+      if(!customer)
+        throw new HttpException({message: 'CUSTOMER_NOT_FOUND', error: {message: 'CUSTOMER IS NOT FOUND'}}, HttpStatus.NOT_FOUND)
 
       let tableCheck = await this.tableCheck(
         input.tableId,
@@ -70,6 +88,14 @@ export class ReservationService {
         await queryRunner.commitTransaction();
 
         //Email User here TO BE IMPLEMENTED
+        let message = {
+          text: `Your reservation has been completed, thank you for using our service.`,
+          from: `Reyner Atmadja <dreamofpast@gmail.com>`,
+          to : `${customer.username} <${customer.email}>`,
+          subject: `Reservation Completed` 
+        }
+
+        await client.sendMail(message);
 
         return saveResult;
       } else {
