@@ -91,8 +91,8 @@ export class CustomerService {
 
     return {
       count: queryResult[1],
-      rows: queryResult[0]
-    }
+      rows: queryResult[0],
+    };
   }
 
   async updateCustomer(input: updateCustomerDto): Promise<any> {

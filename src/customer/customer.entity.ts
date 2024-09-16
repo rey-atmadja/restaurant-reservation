@@ -1,4 +1,5 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Reservations } from 'src/reservation/reservation.entity';
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
 
 @Entity({
   name: 'customer',
@@ -23,4 +24,9 @@ export class Customer {
     default: `now()`,
   })
   createdAt?: Date;
+
+  @OneToMany(() => Reservations, (reservation) => reservation.customer, {
+    onDelete: 'CASCADE',
+  })
+  reservations?: Reservations[];
 }

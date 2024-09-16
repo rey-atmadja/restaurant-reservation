@@ -5,7 +5,12 @@ import { Repository, DataSource, QueryFailedError } from 'typeorm';
 import { Table } from './table.entity';
 
 import * as lodash from 'lodash';
-import { addTableDto, deleteTableDto, getTableViaRestaurantIDDto, updateTableDto } from './table.dto';
+import {
+  addTableDto,
+  deleteTableDto,
+  getTableViaRestaurantIDDto,
+  updateTableDto,
+} from './table.dto';
 
 @Injectable()
 export class TableService {
@@ -120,13 +125,13 @@ export class TableService {
     }
   }
 
-  async getTableViaRestaurantID(input : getTableViaRestaurantIDDto) {
+  async getTableViaRestaurantID(input: getTableViaRestaurantIDDto) {
     let queryResult = await this.tableRepository.findAndCount({
       relations: {
-        restaurant: true
+        restaurant: true,
       },
       where: {
-        restaurantId: input.restaurantId
+        restaurantId: input.restaurantId,
       },
       take: input.limit || 10,
       skip: input.offset || 0,
@@ -157,10 +162,10 @@ export class TableService {
           },
           HttpStatus.NOT_FOUND,
         );
-      await queryRunner.manager.delete(Table, {id: toDelete.id});
+      await queryRunner.manager.delete(Table, { id: toDelete.id });
       await queryRunner.commitTransaction();
 
-      return {deleted: toDelete};
+      return { deleted: toDelete };
     } catch (error) {
       await queryRunner.rollbackTransaction();
 

@@ -6,6 +6,7 @@ import { AppService } from './app.service';
 import { CustomerModule } from './customer/customer.module';
 
 import configuration from './helper/configEnv';
+import { ReservationModule } from './reservation/reservation.module';
 import { RestaurantModule } from './restaurant/restaurant.module';
 import { TableModule } from './table/table.module';
 
@@ -22,12 +23,13 @@ import { TableModule } from './table/table.module';
         password: configService.get<string>('database.password'),
         database: configService.get<string>('database.database'),
         autoLoadEntities: true,
-        synchronize: false
+        synchronize: false,
       }),
     }),
     CustomerModule,
     RestaurantModule,
-    TableModule
+    TableModule,
+    ReservationModule,
   ],
   controllers: [AppController],
   providers: [AppService],

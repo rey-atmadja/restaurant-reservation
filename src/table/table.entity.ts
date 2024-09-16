@@ -1,31 +1,44 @@
+import { Reservations } from 'src/reservation/reservation.entity';
 import { Restaurant } from 'src/restaurant/restaurant.entity';
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  ManyToOne,
+  JoinColumn,
+  OneToMany,
+} from 'typeorm';
 
 @Entity({
   schema: 'restaurant_schema',
-  name: 'table'
+  name: 'table',
 })
 export class Table {
   @PrimaryGeneratedColumn('uuid')
   id?: string;
-  
-  @Column('varchar', {name: 'table_no'})
+
+  @Column('varchar', { name: 'table_no' })
   tableNo: string;
-  
-  @Column('uuid', {name: 'restaurant_id'})
+
+  @Column('uuid', { name: 'restaurant_id' })
   restaurantId: string;
-  
+
   @ManyToOne(() => Restaurant, (restaurant) => restaurant.tables)
-  @JoinColumn({name: 'restaurant_id'})
+  @JoinColumn({ name: 'restaurant_id' })
   restaurant?: Restaurant;
 
   @Column('timestamp with time zone', {
-    name: 'created_at'
+    name: 'created_at',
   })
   createdAt?: Date;
 
   @Column('timestamp with time zone', {
-    name: 'updated_at'
+    name: 'updated_at',
   })
   updatedAt?: Date;
+
+  @OneToMany(() => Reservations, (reservation) => reservation.table, {
+    onDelete: 'CASCADE',
+  })
+  reservations?: Reservations[];
 }

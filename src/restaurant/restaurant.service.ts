@@ -40,8 +40,8 @@ export class RestaurantService {
         closingTime: input.closingTime,
       };
 
-      let openingTimeDate = moment(input.openingTime, 'hh:mm');
-      let closingTimeDate = moment(input.closingTime, 'hh:mm');
+      let openingTimeDate = moment(input.openingTime, 'HH:mm');
+      let closingTimeDate = moment(input.closingTime, 'HH:mm');
       let isAfter = closingTimeDate.isAfter(openingTimeDate);
 
       if (!isAfter)
@@ -166,10 +166,10 @@ export class RestaurantService {
           },
           HttpStatus.NOT_FOUND,
         );
-      await queryRunner.manager.delete(Restaurant, {id: toDelete.id});
+      await queryRunner.manager.delete(Restaurant, { id: toDelete.id });
       await queryRunner.commitTransaction();
 
-      return {deleted: toDelete};
+      return { deleted: toDelete };
     } catch (error) {
       await queryRunner.rollbackTransaction();
 
@@ -191,7 +191,7 @@ export class RestaurantService {
     let time = timeNow();
     let queryResult = await this.restaurantRepository.findAndCount({
       relations: {
-        tables: true
+        tables: true,
       },
       where: {
         openingTime: LessThanOrEqual(time),

@@ -2,21 +2,22 @@ import * as coreJoi from 'joi';
 import joiDate from '@joi/date';
 const Joi = coreJoi.extend(joiDate) as typeof coreJoi;
 import {
-  addRestaurantDto,
-  deleteRestaurantDto,
-  getOpenRestaurantForReservationDto,
-  updateRestaurantDto,
-} from './restaurant.dto';
+  addReservationDto,
+  cancelReservationDto,
+  getReservationsByRestaurantIdDto,
+  getReservationsDoneByCustomerDto,
+  updateReservationDto,
+} from './reservation.dto';
 import { HttpException, HttpStatus } from '@nestjs/common';
 
-export class RestaurantValidation {
-  addRestaurant(payload: any): addRestaurantDto {
+export class ReservationValidation {
+  addReservation(payload: any): addReservationDto {
     const validationSchema: coreJoi.ObjectSchema = Joi.object({
-      name: Joi.string().required(),
-      openingTime: Joi.string()
-        .regex(/([01]\d|2[0-3]):?([0-5]\d)/)
-        .required(),
-      closingTime: Joi.string()
+      restaurantId: Joi.string().guid().required(),
+      customerId: Joi.string().guid().required(),
+      tableId: Joi.string().guid().required(),
+      reservationDate: Joi.date().format('YYYY-MM-DD').raw().required(),
+      reservationTime: Joi.string()
         .regex(/([01]\d|2[0-3]):?([0-5]\d)/)
         .required(),
     });
@@ -33,10 +34,11 @@ export class RestaurantValidation {
     return validation.value;
   }
 
-  getOpenRestaurantForReservation(
+  getReservationsDoneByCustomer(
     payload: any,
-  ): getOpenRestaurantForReservationDto {
+  ): getReservationsDoneByCustomerDto {
     const validationSchema: coreJoi.ObjectSchema = Joi.object({
+      customerId: Joi.string().guid().required(),
       limit: Joi.number().optional(),
       offset: Joi.number().optional(),
     });
@@ -53,13 +55,32 @@ export class RestaurantValidation {
     return validation.value;
   }
 
-  updateRestaurant(payload: any): updateRestaurantDto {
+  getReservationsByRestaurantId(
+    payload: any,
+  ): getReservationsByRestaurantIdDto {
+    const validationSchema: coreJoi.ObjectSchema = Joi.object({
+      restaurantId: Joi.string().guid().required(),
+      limit: Joi.number().optional(),
+      offset: Joi.number().optional(),
+    });
+
+    const validation = validationSchema.validate(payload);
+    if (validation.error)
+      throw new HttpException(
+        { message: 'VALIDATION_ERROR', error: validation.error.details },
+        HttpStatus.BAD_REQUEST,
+        {
+          cause: validation.error,
+        },
+      );
+    return validation.value;
+  }
+
+  updateReservation(payload: any): updateReservationDto {
     const validationSchema: coreJoi.ObjectSchema = Joi.object({
       id: Joi.string().guid().required(),
-      openingTime: Joi.string()
-        .regex(/([01]\d|2[0-3]):?([0-5]\d)/)
-        .optional(),
-      closingTime: Joi.string()
+      reservationDate: Joi.date().format('YYYY-MM-DD').raw().optional(),
+      reservationTime: Joi.string()
         .regex(/([01]\d|2[0-3]):?([0-5]\d)/)
         .optional(),
     });
@@ -76,7 +97,7 @@ export class RestaurantValidation {
     return validation.value;
   }
 
-  deleteRestaurant(payload: any): deleteRestaurantDto {
+  cancelReservation(payload: any): cancelReservationDto {
     const validationSchema: coreJoi.ObjectSchema = Joi.object({
       id: Joi.string().guid().required(),
     });

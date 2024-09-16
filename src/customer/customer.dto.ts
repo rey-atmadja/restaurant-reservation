@@ -1,11 +1,11 @@
-import { baseBatchGetDto } from "src/helper/base.dto";
+import { baseBatchGetDto } from 'src/helper/base.dto';
 
 export interface getCustomersDto extends baseBatchGetDto {}
 
 export interface addCustomerDto {
-  username: string
-  password: string
-  email: string
+  username: string;
+  password: string;
+  email: string;
 }
 
 export interface updateCustomerDto {

@@ -1,4 +1,4 @@
-import { baseBatchGetDto } from "src/helper/base.dto";
+import { baseBatchGetDto } from 'src/helper/base.dto';
 
 export interface addTableDto {
   restaurantId: string;
