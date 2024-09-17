@@ -84,6 +84,7 @@ export class CustomerService {
   }
 
   async getCustomers(input: getCustomersDto) {
+    //Get all customers, with limit and offset, alongside entity counts in order to support pagination
     let queryResult = await this.customerRepository.findAndCount({
       take: input.limit || 10,
       skip: input.offset || 0,
@@ -96,12 +97,14 @@ export class CustomerService {
   }
 
   async updateCustomer(input: updateCustomerDto): Promise<any> {
+    //Set up transaction
     const queryRunner = this.dataSource.createQueryRunner();
 
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
     try {
+      //If empty input, return error as there would be nothing to update
       if (lodash.isNil(input.email) && lodash.isNil(input.password))
         throw new HttpException(
           {
@@ -114,6 +117,8 @@ export class CustomerService {
       let toUpdate = await queryRunner.manager.findOne(Customer, {
         where: { id: input.id },
       });
+
+      //Throw error if object to update is missing
 
       if (lodash.isNil(toUpdate))
         throw new HttpException(
@@ -169,11 +174,13 @@ export class CustomerService {
   }
 
   async deleteCustomer(input: deleteCustomerDto) {
+    //Set up transaction
     const queryRunner = this.dataSource.createQueryRunner();
 
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
+    //If Object is missing, throw error
     try {
       let toDelete = await queryRunner.manager.findOne(Customer, {
         where: { id: input.id },
@@ -187,6 +194,8 @@ export class CustomerService {
           },
           HttpStatus.NOT_FOUND,
         );
+
+      //Delete user
 
       await queryRunner.manager.delete(Customer, { id: input.id });
       await queryRunner.commitTransaction();

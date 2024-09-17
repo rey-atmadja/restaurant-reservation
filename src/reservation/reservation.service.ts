@@ -28,15 +28,10 @@ import {
 
 import{createTransport }from 'nodemailer';
 import { Customer } from 'src/customer/customer.entity';
+import { ConfigService } from '@nestjs/config';
 
-const client = createTransport({
-  host: 'smtp.gmail.com',
-  port: 587,
-  auth: {
-    user: 'dreamofpast@gmail.com',
-    pass: 'cfqt rkwg zxkf rmvf'
-  }
-})
+//Setup smtp client
+
 
 @Injectable()
 export class ReservationService {
@@ -50,6 +45,7 @@ export class ReservationService {
     @InjectRepository(Customer)
     private customerRepository: Repository<Customer>,
     private dataSource: DataSource,
+    private configService: ConfigService
   ) {}
 
   async addReservation(input: addReservationDto) {
@@ -59,9 +55,20 @@ export class ReservationService {
     await queryRunner.startTransaction();
 
     try {
+      const client = createTransport({
+        host: 'smtp.gmail.com',
+        port: 587,
+        auth: {
+          user: this.configService.get('emailUser.emailUser'),
+          pass: this.configService.get('emailUser.emailPassword')
+        }
+      })
+
+      //Check if reservation is able to be made
       let restaurantCheck = await this.restaurantCheck(input.restaurantId);
       let customer = await this.customerRepository.findOne({where: {id: input.customerId}});
 
+      //If customer is not found, error out
       if(!customer)
         throw new HttpException({message: 'CUSTOMER_NOT_FOUND', error: {message: 'CUSTOMER IS NOT FOUND'}}, HttpStatus.NOT_FOUND)
 
@@ -71,6 +78,7 @@ export class ReservationService {
         input.reservationTime,
       );
 
+      //If reservation is able to be made, add it.
       if (restaurantCheck && tableCheck) {
         let newReservation: Reservations = {
           tableId: input.tableId,
@@ -87,7 +95,7 @@ export class ReservationService {
         let saveResult = await queryRunner.manager.save(reservationInstance);
         await queryRunner.commitTransaction();
 
-        //Email User here TO BE IMPLEMENTED
+        //Email User when done
         let message = {
           text: `Your reservation has been completed, thank you for using our service.`,
           from: `Reyner Atmadja <dreamofpast@gmail.com>`,
@@ -99,6 +107,7 @@ export class ReservationService {
 
         return saveResult;
       } else {
+        //If restaurant is closed or table is not able to be reserved
         if (!restaurantCheck)
           return {
             message: 'Restaurant is currently closed, please try again later.',
@@ -165,6 +174,7 @@ export class ReservationService {
         ),
       },
     });
+    
 
     if (!lodash.isEmpty(toCheck)) return false;
 
@@ -172,6 +182,7 @@ export class ReservationService {
   }
 
   async getReservationsDoneByCustomer(input: getReservationsDoneByCustomerDto) {
+    //Get reservations done via customer id
     let queryResult = await this.reservationRepository.findAndCount({
       select: {
         id: true,
@@ -205,6 +216,7 @@ export class ReservationService {
   }
 
   async getReservationsByRestaurantId(input: getReservationsByRestaurantIdDto) {
+    //Get reservations done via restaurant id
     let queryResult = await this.reservationRepository.findAndCount({
       select: {
         id: true,
@@ -239,12 +251,15 @@ export class ReservationService {
   }
 
   async updateReservation(input: updateReservationDto) {
+
+    //Set up transaction
     const queryRunner = this.dataSource.createQueryRunner();
 
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
     try {
+      //Only allow users to update date and time only, not change table
       if (
         lodash.isNil(input.reservationDate) &&
         lodash.isNil(input.reservationTime)
@@ -266,6 +281,7 @@ export class ReservationService {
       if (input.reservationTime)
         toUpdate.reservationTime = input.reservationTime;
 
+      //Check if the time is valid for the table, if not, don't
       let checkNewTimeValidity = await this.tableCheck(
         toUpdate.tableId,
         toUpdate.reservationDate,
@@ -301,6 +317,8 @@ export class ReservationService {
 
     await queryRunner.connect();
     await queryRunner.startTransaction();
+
+    //Delete reservation via given reservation id
 
     try {
       let toDelete = await this.reservationRepository.findOne({

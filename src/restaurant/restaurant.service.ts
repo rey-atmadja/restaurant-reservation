@@ -28,6 +28,7 @@ export class RestaurantService {
   ) {}
 
   async addRestaurant(input: addRestaurantDto) {
+    //Setup transaction
     const queryRunner = this.dataSource.createQueryRunner();
 
     await queryRunner.connect();
@@ -39,6 +40,8 @@ export class RestaurantService {
         openingTime: input.openingTime,
         closingTime: input.closingTime,
       };
+
+      //Check if closing time is higher than opening time, if not, don't allow it
 
       let openingTimeDate = moment(input.openingTime, 'HH:mm');
       let closingTimeDate = moment(input.closingTime, 'HH:mm');
@@ -54,6 +57,8 @@ export class RestaurantService {
           },
           HttpStatus.BAD_REQUEST,
         );
+
+      //If data is valid perform insert
 
       let restaurantInstance = new Restaurant();
 
@@ -114,6 +119,7 @@ export class RestaurantService {
       if (input.openingTime) toUpdate.openingTime = input.openingTime;
       if (input.closingTime) toUpdate.closingTime = input.closingTime;
 
+      //Check if new opening and closing time is valid, if not do not update
       let openingTimeDate = moment(toUpdate.openingTime, 'hh:mm');
       let closingTimeDate = moment(toUpdate.closingTime, 'hh:mm');
       let isAfter = closingTimeDate.isAfter(openingTimeDate);
