@@ -7,6 +7,9 @@ Nest Implementation of a simple restaurant and table reservation system
 ```bash
 $ npm install
 ```
+Use the provided SQL to inject into the database
+
+Update the provided .env with the proper database URL
 
 ## Compile and run the project
 
